@@ -40,7 +40,7 @@ Cette commande permet de prendre tout le contenu d'un commit et de le rappatrier
 
 Prenons un exemple:
 Sur la branche **branche-a-cherry-pick** se trouve 2 commits, un où nous avons ajouté un nouveau fichier (test.txt) et le second où nous avons modifié le contenu du fichier README.md.
-Nous créons une seconde branche dans laquelle nous aurons besoin du fichier test.txt, présent je le rappelle uniquement sur la branche **branche-a-cherry-pick**. On pourrait très bien rebase cette dernière mais nous ne sommes pas intéressé par le second commit (en plus il parait que c'est un commit qui sera réécrit par la suite), Le cherry-pick est donc parfaitement adapté ici.
+Nous créons une seconde branche dans laquelle nous aurons besoin du fichier test.txt, présent je le rappelle uniquement sur la branche **branche-a-cherry-pick**. On pourrait très bien rebase cette dernière mais nous ne sommes pas intéressés par le second commit (en plus il parait que c'est un commit qui sera réécrit par la suite), Le cherry-pick est donc parfaitement adapté ici.
 Mettez-vous sur la branche **branche-a-cherry-pick** et copiez le SHA-1 du commit concernant l'ajout du fichier test.txt. Une fois fait mettez-vous sur la branche **cherry-pick** et exécutez la commande suivante :
 
 ```
@@ -52,6 +52,9 @@ git cherry-pick SHA-1-du-commit-de-la-branche-a-cherry-pick
 ## Rebase --onto
 
 Pour expliquer le rebase onto on peut reprendre une partie de notre exemple du cherry-pick. En effet au lieu de cherry-pick un commit de la branche **branche-a-cherry-pick** on va carrément tirer notre nouvelle branche (qu'on va appeler **rebase-onto**) de cette dernière comme ça on ne se prend pas la tête et on a tous les commits !
+
+- Vous pouvez donc tirer la branche dès maintenant
+
 Quand on n'est pas très à l'aise avec Git, tirer une branche à partir d'une autre branche que la **develop** peut s'avérer source d'ennui et de perte de temps et de sang-froid !
 
 Comme nous l'avons vu dans la section précédente, le second commit de la branche **branche-a-cherry-pick** est un commit temporaire donc il va être réecrit et la branche va être force push. A vous de jouer maintenant :
@@ -61,7 +64,7 @@ Comme nous l'avons vu dans la section précédente, le second commit de la branc
 - Mergez la branche **branche-a-cherry-pick** sur **develop**
 - Mergez la branche **rebase-onto** (Enfin...essayez :))
 
-Et c'est la que les problèmes arrivent ! En effet comme nous avons tiré notre branche d'une branche dont l'historique n'était pas sec, Git se retrouve complément perdu. Il est très facile de s'en rendre compte rapidement, pour cela faites un git lg pour regarder votre historique. Hum c'est bizarre il n'y a plus aucune trace ni de la branche **develop** ni de la branche **branche-a-cherry-pick**. Pour le moment notre branche est perdu dans les limbes et il est impossible en l'état des choses de la merge à la **develop**. Nous allons donc devoir la "recalibrer".
+Et c'est la que les problèmes arrivent ! En effet comme nous avons tiré notre branche d'une branche dont l'historique n'était pas sec, Git se retrouve complément perdu. Il est très facile de s'en rendre compte rapidement, pour cela faites un git lg pour regarder votre historique. Hum c'est bizarre il n'y a plus aucune trace ni de la branche **develop** ni de la branche **branche-a-cherry-pick**. Pour le moment notre branche est perdu dans les limbes et il est impossible en l'état des choses de la merge sur la **develop**. Nous allons donc devoir la "recalibrer".
 
 Pour cela, copiez le SHA-1 du commit que vous avez écrit puis
 
@@ -75,7 +78,7 @@ Pour s'assuer que notre branche a bien été recalibrée nous pouvons faire un g
 
 ## Commit de fixup
 
-Dans le CodeLabs intermédiaire nous avons comment réécrire l'historique grâce au rebase intéractif (Si vous n'êtes pas à l'aise avec cette notion c'est le moment d'aller voir :)). Voici un exemple : On se rencontre qu'on a oublié d'écrire la doc sur un service, et que ce service a déjà été commit et surtout qu'on en a crée plusieurs entre temps. On crée donc un autre commit spécifiquement pour la doc puis on lance le rebase intéractif, etc etc le process habituel.
+Dans le CodeLabs intermédiaire nous avons vu comment réécrire l'historique grâce au rebase intéractif (Si vous n'êtes pas à l'aise avec cette notion c'est le moment d'aller voir :)). Voici un exemple : On se rencontre qu'on a oublié d'écrire la doc sur un service, et que ce service a déjà été commit et surtout qu'on en a crée d'autres entre temps. On crée donc un autre commit spécifiquement pour la doc puis on lance le rebase intéractif, etc etc le process habituel.
 Nous allons voir ici comment améliorer ce process pour le faire en une seule ligne !
 
 Vous pouvez aller sur la branche **fixup**. Sur cette branche il y a 2 commits : un qui concerne le fichier fixup.txt fraîchement crée et le 2e pour le fichier README.md. Seulement voila, nous avons oublié de remplir le fichier fixup.txt !
@@ -93,7 +96,7 @@ git commit --fixup SHA-1
 
 > SHA-1 étant celui du commit que vous avez copié précédemment.
 
-Cette commande va créer un commit de fixup, c'est à dire qu'elle va automatiquement lier votre commit sous le commit concerné.
+Cette commande va créer un commit de fixup, c'est à dire qu'elle va automatiquement lier votre commit au commit concerné.
 
 ![fixup](screenshots/fixup.png)
 
@@ -138,10 +141,9 @@ git reflog
 
 Pendant que vous travaillez, Git enregistre l'emplacement de votre HEAD chaque fois que vous le changez. À chaque commit ou commutation de branche, le journal des références (reflog) est mis à jour.
 
-Voici comment ça se présente
+Voici comment ça se présente lorsqu'on fait un reflog :
 
 ```
-$ git reflog
 1a410ef HEAD@{0}: 1a410efbd13591db07496601ebc7a059dd55cfe9: updating HEAD
 ab1afef HEAD@{1}: ab1afef80fac8e34258ff41fc1b867c702daa24b: updating HEAD
 ```
@@ -151,3 +153,44 @@ Il est donc possible de revenir à une vieille version de votre HEAD en faisant 
 ```
 git reset --hard SHA-1
 ```
+
+## Mode édition de l'ajout
+
+Pour rappel, lorsque vous faites la commande
+
+```
+git add -p
+```
+
+Git va découper les parties modifiées pour nous laisser la possibilité de faire des commits plus fin. Il arrive parfois que ce découpage ne soit pas assez fin, heureusement Git nous propose 2 options pour remédier à cela
+
+- s (split) redécoupe automatiquement la section.
+- e (edit) permet directement d'éditer la section.
+
+Le mode édition existe car il arrive parfois que l'utilisation du split ne soit pas suffisant, il permet ainsi d'être le découpage ultime.
+
+Nous allons voir un exemple ensemble, pour cela mettez-vous sur la branche **add-interactif**
+
+- Ajoutez 2 lignes au fichier README.md
+- faites un
+
+```
+git add -p
+```
+
+- Dans la liste des options disponibles, choisissez "s"
+- Rien ne se passe
+- Choisissez "e"
+- n'ajoutez que la 1e ligne
+- Commitez
+- Retournez sur le fichier et supprimer la 1e ligne (donc celle que vous venir d'ajouter)
+- faites un
+
+```
+git add -p
+```
+
+- Ajoutez uniquement la 2e ligne
+- Commitez
+
+A la fin vous devriez avoir 2 commits, mais la ligne 1 ne doit plus apparaître dans le fichier.
